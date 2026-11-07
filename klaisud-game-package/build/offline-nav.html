@@ -1,0 +1,15 @@
+<style>
+.vnav{display:inline-flex;gap:4px;background:var(--surface,#fff);border-radius:12px;padding:4px;box-shadow:0 4px 0 var(--edge,#c3d6ee);margin-right:12px;vertical-align:middle}
+.vnav a{font:600 .92rem "Mitr","Noto Sans Thai",sans-serif;color:var(--blue,#1f6fd1);text-decoration:none;padding:6px 12px;border-radius:9px}
+.vnav a.on{background:var(--blue,#1f6fd1);color:#fff}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const mk=()=>{const n=document.createElement("nav");n.className="vnav";n.setAttribute("aria-label","สลับหน้า");
+    n.innerHTML='<a href="#">จอใหญ่</a><a href="#score">หลังบ้าน</a><a href="#demo">สาธิต</a>';return n};
+  const navs=[];
+  document.querySelectorAll(".tools").forEach(t=>{const g=t.querySelector(".grow");const n=mk();navs.push(n);(g||t).prepend(n)});
+  const mark=()=>{const h=location.hash||"#";navs.forEach(n=>n.querySelectorAll("a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")===h)))};
+  addEventListener("hashchange",mark);mark();
+});
+</script>
