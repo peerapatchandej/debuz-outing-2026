@@ -450,6 +450,7 @@ h1 em{text-shadow:0 4px 0 #fff,0 8px 0 rgba(189,86,11,.22)}
 .addrow svg,.qhead .ib svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
 .addrow:disabled{opacity:.45;cursor:not-allowed}
 .edrow .empty{font-style:normal;color:var(--muted)}
+.edrow .etm{flex:none;font:600 .8rem var(--display);font-variant-numeric:tabular-nums;color:var(--muted);background:var(--wash,var(--bg));padding:3px 9px;border-radius:999px}
 .edrow .x2t{font:600 .75rem var(--display);color:#fff;background:var(--orange);padding:1px 7px;border-radius:999px;margin-left:4px}
 .eopts{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
 .seg{display:inline-flex;background:var(--soft);border-radius:12px;padding:3px;gap:3px}
@@ -927,7 +928,7 @@ body.demo{overflow:hidden}
         <div class="stagetop">
           <span class="qno" id="qno"></span>
           <span id="tags" style="display:flex;gap:6px;flex-wrap:wrap"></span>
-          <button class="stimer" id="timerBtn" aria-label="จับเวลาข้อนี้"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M10 2h4"/></svg><span class="sl">จับเวลา</span><b id="timerBadge">1:00</b></button>
+          <button class="stimer" id="timerBtn" aria-label="จับเวลาข้อนี้"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M10 2h4"/></svg><span class="sl">จับเวลา</span><b id="timerBadge">2:00</b></button>
         </div>
         <div class="qbox" id="qbox">
           <h2 class="q" id="q"></h2>
@@ -989,7 +990,7 @@ body.demo{overflow:hidden}
         <div class="ctlrow">
           <div class="ctl">
             <span class="lb">เวลา</span>
-            <span class="mclock" id="bsClock">1:00</span>
+            <span class="mclock" id="bsClock">2:00</span>
             <button class="sbtn go" id="bsTStart">เริ่มจับเวลา</button>
             <button class="sbtn" id="bsTAdd">+30 วิ</button>
             <button class="sbtn" id="bsTReset">รีเซ็ต</button>
@@ -1035,7 +1036,7 @@ body.demo{overflow:hidden}
     <p class="tq" id="tQ"></p>
     <div class="bigring" id="bigRing">
       <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="52"></circle><circle class="prog" id="bigProg" cx="60" cy="60" r="52"></circle></svg>
-      <span class="tnum" id="bigClock" role="timer">1:00</span>
+      <span class="tnum" id="bigClock" role="timer">2:00</span>
     </div>
     <div class="tctl" id="tctl">
       <button class="btn big" id="tStart">เริ่มจับเวลา</button>
@@ -1124,6 +1125,10 @@ body.demo{overflow:hidden}
       <div class="ecol" style="max-width:10rem">
         <label class="ef" for="eUnit">หน่วย</label>
         <input class="einput" id="eUnit" placeholder="คน, ปี, กม." maxlength="12">
+      </div>
+      <div class="ecol" style="max-width:10rem">
+        <label class="ef" for="eTime">เวลาข้อนี้</label>
+        <select class="einput" id="eTime"></select>
       </div>
     </div>
     <p class="hint" id="eNote"></p>
@@ -1281,7 +1286,10 @@ body.demo{overflow:hidden}
 <div class="toast" id="toast" hidden></div>
 
 <script>
-const N=12, MAXQ=30, T=60, TMAX=599;   // N = most teams; G.nt = teams in play
+const N=12, MAXQ=30, T=120, TMAX=599;   // N = most teams; G.nt = teams in play; T = default seconds per question
+const TIMES=[30,45,60,90,120,150,180,240,300];   // choices in the question editor
+const secOf=v=>{const s=parseInt(v);return s>=10&&s<=TMAX?s:T};   // per-question time, falls back to 2:00
+const mmss=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
 const nt=()=>G.nt;
 const TC=["#1f6fd1","#f47b20","#12a5b8","#e0a106","#7b5cd6","#e8457c","#27a35a","#0f3f80","#ff8f3d","#3bb4f2","#b8569e","#6c8a1f"];
 // team colour follows a colour word in the team name (Thai or English), else the default palette
@@ -1317,7 +1325,7 @@ const isDemoHash=()=>location.hash==="#demo";
 
 /* ================= state ================= */
 function blankQ(){return{g:Array(N).fill(""),b:Array(N).fill(0),d:null,shown:false,ans:"",open:false}}
-function sanQ(x,dflt){x=x&&typeof x==="object"?x:{};dflt=dflt||{};return{q:String(x.q??dflt.q??""),how:String(x.how??dflt.how??""),unit:String(x.unit??dflt.unit??""),kind:(x.kind??dflt.kind)==="live"?"live":"fill",bet:!!(x.bet??dflt.bet),max:!!(x.max??dflt.max)}}
+function sanQ(x,dflt){x=x&&typeof x==="object"?x:{};dflt=dflt||{};return{q:String(x.q??dflt.q??""),how:String(x.how??dflt.how??""),unit:String(x.unit??dflt.unit??""),kind:(x.kind??dflt.kind)==="live"?"live":"fill",bet:!!(x.bet??dflt.bet),max:!!(x.max??dflt.max),sec:secOf(x.sec??dflt.sec)}}
 function defGame(){return{cur:0,open:0,nt:8,names:Array.from({length:N},(_,i)=>`ทีม ${i+1}`),qd:DEF.map(d=>sanQ(d)),manual:Array(N).fill(0),
   qs:DEF.map(blankQ),timer:{id:0,left:T,running:false,at:0,cd:0},results:0,prize:"",log:[]}}
 // score history entry: {at: ms, t: team, n: team name at that moment, d: points, k: question index (-1 = manual), u: 1 when it cancels a question}
@@ -1356,6 +1364,7 @@ function fixGame(o){
   return g;
 }
 const nq=()=>G.qd.length;
+const QT=()=>G.qd[G.cur]?.sec||T;   // timer length of the current question
 const fitA=a=>{const n=Math.max(nq(),a.length);return Array.from({length:Math.min(MAXQ,n)},(_,i)=>String(a[i]??""))};
 let G=defGame();              // shared game (screen reads, backstage writes)
 let A=Array(DEF.length).fill("");     // staff answers, hidden from the screen until reveal
@@ -1419,7 +1428,11 @@ function goLocal(){
       if(e.key===LA){const a=JSON.parse(e.newValue);if(Array.isArray(a)){A=fitA(a);onStaff()}}
     }catch(x){}
   });
-  staffOK=true;setMode("local");prevResults=G.results;onState();onStaff();
+  staffOK=true;setMode("local");prevResults=G.results;
+  // saved before per-question time existed: an untouched clock still holds the old fixed 1:00
+  const t=G.timer;
+  if(!t.running&&t.left===60&&(t.base===undefined||t.base===60)&&QT()!==60){G.timer={...t,left:QT(),base:QT(),fresh:true};push("timer")}
+  onState();onStaff();
 }
 
 /* writes: one in flight per document, latest values win */
@@ -1569,7 +1582,7 @@ function ended(){
     if(view()==="screen")showTimeup();else toast("หมดเวลา! กรอกตัวเลขที่แต่ละทีมยกป้าย");
     if(view()==="screen"&&!$("timerOv").hidden){clearTimeout(autoCloseT);autoCloseT=setTimeout(()=>{if(!tl.running)closeOv("timerOv")},2200)}
   }
-  if(canWrite&&t.running){G.timer={id:t.id,v:(+t.v||0)+1,left:0,running:false,at:Date.now(),cd:0,base:T};tLatest={...G.timer};push("timer")}
+  if(canWrite&&t.running){G.timer={id:t.id,v:(+t.v||0)+1,left:0,running:false,at:Date.now(),cd:0,base:QT()};tLatest={...G.timer};push("timer")}
   tl=compute();drawTimers();
 }
 function setTimer(t){t.v=(+G.timer.v||0)+1;G.timer=t;tLatest={...t};push("timer");syncTimer()}
@@ -1579,21 +1592,21 @@ function timerStart(){
   if(!canWrite)return;
   if(!G.qs[G.cur].open)openQ();
   const c=compute(),t=G.timer,over=c.left===0;
-  const fresh=over||t.fresh||(!t.running&&c.left===T);
-  const left=over?T:c.left;
-  setTimer({id:(G.timer.id||0)+1,left,running:true,at:Date.now(),cd:fresh?3:0,base:Math.max(T,left)});
+  const fresh=over||t.fresh||(!t.running&&c.left===QT());
+  const left=over?QT():c.left;
+  setTimer({id:(G.timer.id||0)+1,left,running:true,at:Date.now(),cd:fresh?3:0,base:Math.max(QT(),left)});
 }
 function timerPause(){
   if(!canWrite)return;const c=compute(),t=G.timer;
-  setTimer({id:t.id,left:c.left,running:false,at:Date.now(),cd:0,base:t.base||T,fresh:c.pre>0||!!(t.fresh&&!t.running)});
+  setTimer({id:t.id,left:c.left,running:false,at:Date.now(),cd:0,base:t.base||QT(),fresh:c.pre>0||!!(t.fresh&&!t.running)});
 }
-function timerReset(){if(!canWrite)return;setTimer({id:(G.timer.id||0)+1,left:T,running:false,at:Date.now(),cd:0,base:T,fresh:true})}
+function timerReset(){if(!canWrite)return;setTimer({id:(G.timer.id||0)+1,left:QT(),running:false,at:Date.now(),cd:0,base:QT(),fresh:true})}
 function timerAdd(sec){
   if(!canWrite)return;
   const c=compute(),t=G.timer;
-  if(t.running&&c.pre>0)setTimer({...t,left:Math.min(TMAX,t.left+sec),base:(t.base||T)+sec});
-  else if(t.running&&c.running)setTimer({id:t.id,left:Math.min(TMAX,c.left+sec),running:true,at:Date.now(),cd:0,base:Math.max(t.base||T,c.left+sec)});
-  else{const l=Math.min(TMAX,(c.left===0?0:c.left)+sec);setTimer({id:t.id,left:l,running:false,at:Date.now(),cd:0,base:Math.max(T,l),fresh:!!t.fresh||c.left===T})}
+  if(t.running&&c.pre>0)setTimer({...t,left:Math.min(TMAX,t.left+sec),base:(t.base||QT())+sec});
+  else if(t.running&&c.running)setTimer({id:t.id,left:Math.min(TMAX,c.left+sec),running:true,at:Date.now(),cd:0,base:Math.max(t.base||QT(),c.left+sec)});
+  else{const l=Math.min(TMAX,(c.left===0?0:c.left)+sec);setTimer({id:t.id,left:l,running:false,at:Date.now(),cd:0,base:Math.max(QT(),l),fresh:!!t.fresh||c.left===QT()})}
 }
 function timerToggle(){compute().running?timerPause():timerStart()}
 
@@ -1637,9 +1650,9 @@ function listen(){
 const CIRC=2*Math.PI*52;
 $("bigProg").style.strokeDasharray=CIRC;
 function drawTimers(){
-  const run=tl.running,left=(!run&&tl.left===0&&!G.qs[G.cur].open)?T:tl.left,pre=run&&tl.pre>0,go=run&&tl.go;
+  const run=tl.running,left=(!run&&tl.left===0&&!G.qs[G.cur].open)?QT():tl.left,pre=run&&tl.pre>0,go=run&&tl.go;
   const mmss=x=>`${Math.floor(x/60)}:${String(x%60).padStart(2,"0")}`;
-  const t=G.timer,fresh=!run&&(t.fresh||left===T||left===0);
+  const t=G.timer,fresh=!run&&(t.fresh||left===QT()||left===0);
   const label=pre?String(tl.pre):go?"เริ่ม!":left===0?"หมดเวลา":mmss(left);
   const startLbl=run?"หยุดชั่วคราว":fresh?"เริ่มจับเวลา":"เดินต่อ";
   // screen pop-up
@@ -1648,7 +1661,7 @@ function drawTimers(){
   if((pre||go)&&label!==lastLbl&&!reduce){bc.classList.remove("pop");void bc.offsetWidth;bc.classList.add("pop")}
   lastLbl=label;
   $("bigRing").classList.toggle("pre",pre||go);
-  $("bigProg").style.strokeDashoffset=CIRC*(1-Math.min(1,left/Math.max(t.base||T,left)));
+  $("bigProg").style.strokeDashoffset=CIRC*(1-Math.min(1,left/Math.max(t.base||QT(),left)));
   $("bigRing").classList.toggle("warn",run&&!pre&&!go&&left<=10&&left>0);
   $("bigRing").classList.toggle("over",left===0);
   $("bigRing").classList.toggle("last",run&&!pre&&!go&&left<=5&&left>0);
@@ -1921,7 +1934,7 @@ function patchPodsScore(){
 function bsMsg(t,warn){$("bsMsg").textContent=t;if(warn&&t&&view()==="screen")toast(t)}
 function go(k){
   if(!canWrite||k<0||k>=nq())return;
-  G.cur=k;G.open=1;G.timer={id:(G.timer.id||0)+1,left:T,running:false,at:Date.now(),cd:0};
+  G.cur=k;G.open=1;G.timer={id:(G.timer.id||0)+1,left:QT(),running:false,at:Date.now(),cd:0,base:QT(),fresh:true};
   push("cur","open","timer");bsMsg("");onState();
 }
 function calc(){
@@ -1950,7 +1963,7 @@ function calc(){
   const now=Date.now();
   logAdd(q.d.slice(0,nt()).map((d,t)=>d?{at:now,t,n:G.names[t],d,k:i}:null).filter(Boolean));
   const keys=["qs","log"];
-  if(tl.running){G.timer={id:G.timer.id,v:(+G.timer.v||0)+1,left:tl.left,running:false,at:Date.now(),cd:0,base:G.timer.base||T};tLatest={...G.timer};keys.push("timer")}
+  if(tl.running){G.timer={id:G.timer.id,v:(+G.timer.v||0)+1,left:tl.left,running:false,at:Date.now(),cd:0,base:G.timer.base||QT()};tLatest={...G.timer};keys.push("timer")}
   push(...keys);
   const win=r.rank.map((rk,t)=>rk===1?G.names[t]:null).filter(Boolean);
   bsMsg(`ขึ้นจอแล้ว · ใกล้สุด: ${win.join(", ")}`);
@@ -2025,7 +2038,7 @@ function renderSRows(){
   $("qCount").textContent=`${nq()} ข้อ`;$("addQ").disabled=$("addQ2").disabled=nq()>=MAXQ;
   $("srows").innerHTML=G.qd.map((d,i)=>{
     const st=d.kind==="fill"?(num(A[i])!==null?["ok",`คำตอบ ${esc(A[i])}${d.unit?" "+d.unit:""}`]:["miss","ยังไม่ใส่คำตอบ"]):["live","ตอบสดในห้อง"];
-    return `<button class="edrow" data-i="${i}"><span class="sno${d.bet?" bet":""}">${i+1}</span><span class="es">${d.q.trim()?hl(d.q):'<em class="empty">ยังไม่มีโจทย์</em>'}${d.bet?' <b class="x2t">×2</b>':""}</span><span class="ea ${st[0]}">${st[1]}</span><span class="pen" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span></button>`;
+    return `<button class="edrow" data-i="${i}"><span class="sno${d.bet?" bet":""}">${i+1}</span><span class="es">${d.q.trim()?hl(d.q):'<em class="empty">ยังไม่มีโจทย์</em>'}${d.bet?' <b class="x2t">×2</b>':""}</span><span class="etm" title="เวลาข้อนี้">${mmss(d.sec)}</span><span class="ea ${st[0]}">${st[1]}</span><span class="pen" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span></button>`;
   }).join("");
 }
 function renderNames(){
@@ -2063,7 +2076,8 @@ function backupApply(){
   if(!bkPending||!canWrite)return;
   const {g,answers}=bkPending;bkPending=null;
   g.results=0;                                          // never pop the results screen on import
-  g.timer={...defGame().timer,id:Math.max(Date.now(),(G.timer.id||0)+1),base:T,fresh:true};   // a running timer saved in the file is stale
+  const gs=g.qd[g.cur]?.sec||T;
+  g.timer={...defGame().timer,id:Math.max(Date.now(),(G.timer.id||0)+1),left:gs,base:gs,fresh:true};   // a running timer saved in the file is stale
   G=g;prevResults=0;
   A=fitA(answers);                                      // fitA sizes to the imported question count
   push(...Object.keys(G));pushStaff();
@@ -2080,6 +2094,8 @@ function fillEdit(){
   $("eKindFill").setAttribute("aria-pressed",d.kind==="fill");$("eKindLive").setAttribute("aria-pressed",d.kind==="live");
   $("eBet").checked=d.bet;$("eMax").checked=d.max;$("eMaxWrap").hidden=d.kind!=="live";
   $("eAwrap").hidden=d.kind!=="fill";
+  const opts=TIMES.includes(d.sec)?TIMES:[...TIMES,d.sec].sort((a,b)=>a-b);
+  $("eTime").innerHTML=opts.map(s=>`<option value="${s}"${s===d.sec?" selected":""}>${mmss(s)} นาที${s===T?" (ค่าเริ่มต้น)":""}</option>`).join("");
   $("eNote").textContent=d.kind==="fill"?"คำตอบนี้จะไม่ขึ้นจอใหญ่จนกว่าจะกดเฉลย":d.max?"ไม่ต้องใส่คำตอบ ตอนกดเฉลยระบบใช้ตัวเลขสูงสุดของทีมเป็นคำตอบ ทีมที่ตัวเลขสูงสุดชนะ":"ข้อนี้พิมพ์คำตอบในหน้าหลังบ้านตอนเล่น หลังนับหรือถามในห้องแล้ว";
   $("ePrev").disabled=i===0;$("eNext").disabled=i===nq()-1;
   $("eDel").disabled=nq()<=1;delArm=false;$("eDel").textContent="ลบข้อนี้";
@@ -2526,6 +2542,13 @@ function bind(){
   $("eUnit").addEventListener("input",e=>editField("unit",e.target.value.trim()));
   $("eBet").addEventListener("change",e=>{editField("bet",e.target.checked);fillEdit()});
   $("eMax").addEventListener("change",e=>{editField("max",e.target.checked);fillEdit()});
+  $("eTime").addEventListener("change",e=>{
+    const old=G.qd[editI].sec,s=secOf(e.target.value);
+    editField("sec",s);renderSRows();
+    // the question on screen now: an untouched clock follows the new time right away
+    const t=G.timer;
+    if(editI===G.cur&&!t.running&&(t.fresh||t.left===old))timerReset();
+  });
   [$("eKindFill"),$("eKindLive")].forEach(b=>b.onclick=()=>{editField("kind",b.dataset.kind);if(b.dataset.kind==="fill")editField("max",false);fillEdit()});
   $("eDel").onclick=delQ;
   $("addQ").onclick=addQ;$("addQ2").onclick=addQ;

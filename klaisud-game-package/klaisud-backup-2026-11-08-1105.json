@@ -1,7 +1,7 @@
 {
  "kind": "klaisud-backup",
  "v": 1,
- "savedAt": "2026-11-08T03:56:19.986Z",
+ "savedAt": "2026-11-08T04:05:28.640Z",
  "game": {
   "cur": 0,
   "open": 0,
@@ -27,7 +27,8 @@
     "unit": "คน",
     "kind": "fill",
     "bet": false,
-    "max": false
+    "max": false,
+    "sec": 120
    },
    {
     "q": "พนักงานที่อายุน้อยที่สุดในทั้งสองบริษัทอายุกี่ปี",
@@ -35,7 +36,8 @@
     "unit": "ปี",
     "kind": "fill",
     "bet": false,
-    "max": false
+    "max": false,
+    "sec": 120
    },
    {
     "q": "ตอนนี้  Debuz กับ GAMEINDY มีพนักงานผู้หญิงรวมกันกี่คน",
@@ -43,7 +45,8 @@
     "unit": "คน",
     "kind": "fill",
     "bet": false,
-    "max": false
+    "max": false,
+    "sec": 120
    },
    {
     "q": "บริษัท ดี บัสซ์ เปิดมาแล้วกี่ปี",
@@ -51,7 +54,8 @@
     "unit": "ปี",
     "kind": "fill",
     "bet": false,
-    "max": false
+    "max": false,
+    "sec": 120
    },
    {
     "q": "จากออฟฟิศถึงที่พัก Pinnacle Grand Jomtien Resort ระยะทางกี่กิโลเมตร",
@@ -59,7 +63,8 @@
     "unit": "กม.",
     "kind": "fill",
     "bet": false,
-    "max": false
+    "max": false,
+    "sec": 120
    },
    {
     "q": "ทีมของคุณมีอายุงานรวมกันกี่ปี",
@@ -67,7 +72,8 @@
     "unit": "คน",
     "kind": "live",
     "bet": false,
-    "max": true
+    "max": true,
+    "sec": 120
    },
    {
     "q": "ตั้งแต่ต้นปี 2569 จนถึงตอนนี้ Debuz กับ GAMEINDY มียอดขายรวมกันเท่าไหร่",
@@ -75,7 +81,8 @@
     "unit": "บาท",
     "kind": "fill",
     "bet": true,
-    "max": false
+    "max": false,
+    "sec": 120
    },
    {
     "q": "เกม Kritsana ใช้ฉากหลังในปีค.ศ.ใด?",
@@ -83,7 +90,8 @@
     "unit": "",
     "kind": "fill",
     "bet": false,
-    "max": false
+    "max": false,
+    "sec": 120
    },
    {
     "q": "ในห้องนี้มีกี่คนที่ร่วมงานกับบริษัทมาไม่ถึง 1 ปี",
@@ -91,7 +99,8 @@
     "unit": "คน",
     "kind": "fill",
     "bet": false,
-    "max": false
+    "max": false,
+    "sec": 120
    },
    {
     "q": "ในห้องนี้มีกี่คนที่เกิดเดือนเดียวกับวันนี้",
@@ -99,7 +108,8 @@
     "unit": "คน",
     "kind": "fill",
     "bet": false,
-    "max": false
+    "max": false,
+    "sec": 120
    }
   ],
   "manual": [
@@ -149,7 +159,7 @@
     "d": null,
     "shown": false,
     "ans": "",
-    "open": true
+    "open": false
    },
    {
     "g": [
@@ -459,8 +469,8 @@
    }
   ],
   "timer": {
-   "id": 1794068762425,
-   "left": 60,
+   "id": 1794110710033,
+   "left": 120,
    "running": false,
    "at": 0,
    "cd": 0
